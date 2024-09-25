@@ -2583,7 +2583,6 @@ default_imp_for_incremental_authorization!(
     connector::Boku,
     connector::Braintree,
     connector::Checkout,
-    connector::Datatrans,
     connector::Dlocal,
     connector::Ebanx,
     connector::Forte,
