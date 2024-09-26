@@ -140,11 +140,16 @@ pub struct ThreedsInfo {
 pub struct CardHolder {
     cardholder_name: Secret<String>,
     email: Email,
-    bill_addr_line1: Secret<String>,
-    bill_addr_post_code: Secret<String>,
-    bill_addr_city: String,
-    bill_addr_state: Secret<String>,
-    bill_addr_country: common_enums::CountryAlpha2,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    bill_addr_line1: Option<Secret<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    bill_addr_post_code: Option<Secret<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    bill_addr_city: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    bill_addr_state: Option<Secret<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    bill_addr_country: Option<common_enums::CountryAlpha2>,
 }
 
 #[derive(Debug, Clone, Serialize, Default, Deserialize)]
@@ -278,11 +283,11 @@ fn create_card_details(
             cardholder: CardHolder {
                 cardholder_name: item.router_data.get_billing_full_name()?,
                 email: item.router_data.request.get_email()?,
-                bill_addr_line1: billing.get_line1()?.to_owned(),
-                bill_addr_post_code: billing.get_zip()?.to_owned(),
-                bill_addr_city: billing.get_city()?.to_owned(),
-                bill_addr_state: billing.get_state()?.to_owned(),
-                bill_addr_country: billing.get_country()?.to_owned(),
+                bill_addr_line1: billing.get_line1().ok().cloned(),
+                bill_addr_post_code: billing.get_zip().ok().cloned(),
+                bill_addr_city: billing.get_city().ok().cloned(),
+                bill_addr_state: billing.get_state().ok().cloned(),
+                bill_addr_country: billing.get_country().ok().cloned(),
             },
         });
     }
@@ -558,7 +563,9 @@ impl TryFrom<types::PaymentsSyncResponseRouterData<DatatransSyncResponse>>
                         connector_metadata: None,
                         network_txn_id: None,
                         connector_response_reference_id: None,
-                        incremental_authorization_allowed: None,
+                        incremental_authorization_allowed: Some(
+                            status == enums::AttemptStatus::Authorized,
+                        ),
                         charge_id: None,
                     })
                 };
@@ -684,7 +691,7 @@ pub enum DatatransIncrementalAuthorizationResponse {
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct IncrementalAuthorizationResponse {
-    pub increased_amount: String,
+    pub increased_amount: MinorUnit,
 }
 
 impl<F, T>
@@ -727,5 +734,4 @@ impl<F, T>
             },
             ..item.data
         })
-    }
-}
+    }}
