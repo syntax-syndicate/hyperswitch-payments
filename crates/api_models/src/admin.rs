@@ -1867,6 +1867,18 @@ pub struct ProfileCreate {
     #[schema(value_type = Option<Object>, example = r#"{ "click_to_pay": "mca_ushduqwhdohwd", "netcetera": "mca_kwqhudqwd" }"#)]
     pub authentication_product_ids:
         Option<common_types::payments::AuthenticationConnectorAccountMap>,
+
+    /// Determines the maximum unsucessful payment threshold for card<>ip before it is blocked
+    pub card_ip_blocking_threshold: Option<i32>,
+
+    /// Determines the maximum unsucessful payment threshold for card before it is blocked for guest users
+    pub guest_user_card_blocking_threshold: Option<i32>,
+
+    /// Determines the maximum unsucessful payment threshold for customer_id before it is blocked
+    pub customer_id_blocking_threshold: Option<i32>,
+
+   /// Determines the r edis expiry for card testing guard
+    pub card_testing_guard_expiry: Option<i32>,
 }
 
 #[nutype::nutype(
@@ -2122,6 +2134,18 @@ pub struct ProfileResponse {
     #[schema(value_type = Option<Object>, example = r#"{ "click_to_pay": "mca_ushduqwhdohwd", "netcetera": "mca_kwqhudqwd" }"#)]
     pub authentication_product_ids:
         Option<common_types::payments::AuthenticationConnectorAccountMap>,
+
+    /// Determines the maximum unsucessful payment threshold for card<>ip before it is blocked
+    pub card_ip_blocking_threshold: Option<i32>,
+
+    /// Determines the maximum unsucessful payment threshold for card before it is blocked for guest users
+    pub guest_user_card_blocking_threshold: Option<i32>,
+    
+    /// Determines the maximum unsucessful payment threshold for customer_id before it is blocked
+    pub customer_id_blocking_threshold: Option<i32>,
+
+    /// Determines the r edis expiry for card testing guard
+    pub card_testing_guard_expiry: Option<i32>,
 }
 
 #[cfg(feature = "v2")]
@@ -2377,6 +2401,18 @@ pub struct ProfileUpdate {
     #[schema(value_type = Option<Object>, example = r#"{ "click_to_pay": "mca_ushduqwhdohwd", "netcetera": "mca_kwqhudqwd" }"#)]
     pub authentication_product_ids:
         Option<common_types::payments::AuthenticationConnectorAccountMap>,
+
+    /// Determines the maximum unsucessful payment threshold for card<>ip before it is blocked
+    pub card_ip_blocking_threshold: Option<i32>,
+
+    /// Determines the maximum unsucessful payment threshold for card before it is blocked for guest users
+    pub guest_user_card_blocking_threshold: Option<i32>,
+    
+    /// Determines the maximum unsucessful payment threshold for customer_id before it is blocked
+    pub customer_id_blocking_threshold: Option<i32>,
+
+    /// Determines the r edis expiry for card testing guard
+    pub card_testing_guard_expiry: Option<i32>,
 }
 
 #[cfg(feature = "v2")]
