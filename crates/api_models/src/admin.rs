@@ -1877,7 +1877,7 @@ pub struct ProfileCreate {
     /// Determines the maximum unsucessful payment threshold for customer_id before it is blocked
     pub customer_id_blocking_threshold: Option<i32>,
 
-   /// Determines the r edis expiry for card testing guard
+    /// Determines the r edis expiry for card testing guard
     pub card_testing_guard_expiry: Option<i32>,
 }
 
@@ -2140,7 +2140,7 @@ pub struct ProfileResponse {
 
     /// Determines the maximum unsucessful payment threshold for card before it is blocked for guest users
     pub guest_user_card_blocking_threshold: Option<i32>,
-    
+
     /// Determines the maximum unsucessful payment threshold for customer_id before it is blocked
     pub customer_id_blocking_threshold: Option<i32>,
 
@@ -2407,7 +2407,7 @@ pub struct ProfileUpdate {
 
     /// Determines the maximum unsucessful payment threshold for card before it is blocked for guest users
     pub guest_user_card_blocking_threshold: Option<i32>,
-    
+
     /// Determines the maximum unsucessful payment threshold for customer_id before it is blocked
     pub customer_id_blocking_threshold: Option<i32>,
 
