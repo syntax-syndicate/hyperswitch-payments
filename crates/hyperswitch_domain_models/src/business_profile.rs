@@ -235,7 +235,7 @@ pub enum ProfileUpdate {
     NetworkTokenizationUpdate {
         is_network_tokenization_enabled: bool,
     },
-    FingerprintSecretKeyUpdate {
+    CardTestingSecretKeyUpdate {
         card_testing_secret_key: OptionalEncryptableName,
     },
 }
@@ -531,7 +531,7 @@ impl From<ProfileUpdate> for ProfileUpdateInternal {
                 card_testing_guard_config: None,
                 card_testing_secret_key: None,
             },
-            ProfileUpdate::FingerprintSecretKeyUpdate {
+            ProfileUpdate::CardTestingSecretKeyUpdate {
                 card_testing_secret_key,
             } => Self {
                 profile_name: None,
@@ -997,7 +997,7 @@ pub enum ProfileUpdate {
     CollectCvvDuringPaymentUpdate {
         should_collect_cvv_during_payment: bool,
     },
-    FingerprintSecretKeyUpdate {
+    CardTestingSecretKeyUpdate {
         card_testing_secret_key: OptionalEncryptableName,
     },
 }
@@ -1078,7 +1078,7 @@ impl From<ProfileUpdate> for ProfileUpdateInternal {
                     is_click_to_pay_enabled: None,
                     authentication_product_ids,
                     card_testing_guard_config,
-                    card_testing_secret_key,
+                    card_testing_secret_key: card_testing_secret_key.map(Encryption::from),
                 }
             }
             ProfileUpdate::RoutingAlgorithmUpdate {
@@ -1340,7 +1340,7 @@ impl From<ProfileUpdate> for ProfileUpdateInternal {
                 card_testing_guard_config: None,
                 card_testing_secret_key: None,
             },
-            ProfileUpdate::FingerprintSecretKeyUpdate {
+            ProfileUpdate::CardTestingSecretKeyUpdate {
                 card_testing_secret_key,
             } => Self {
                 profile_name: None,
