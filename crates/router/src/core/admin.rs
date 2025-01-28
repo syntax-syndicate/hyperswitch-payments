@@ -3802,6 +3802,10 @@ impl ProfileCreateBridge for api::ProfileCreate {
             is_network_tokenization_enabled: self.is_network_tokenization_enabled,
             is_click_to_pay_enabled: self.is_click_to_pay_enabled,
             authentication_product_ids: self.authentication_product_ids,
+            card_testing_guard_config: self
+                .card_testing_guard_config
+                .map(ForeignInto::foreign_into),
+            card_testing_secret_key: None,
         }))
     }
 }
@@ -4155,6 +4159,10 @@ impl ProfileUpdateBridge for api::ProfileUpdate {
                 is_network_tokenization_enabled: self.is_network_tokenization_enabled,
                 is_click_to_pay_enabled: self.is_click_to_pay_enabled,
                 authentication_product_ids: self.authentication_product_ids,
+                card_testing_guard_config: self
+                    .card_testing_guard_config
+                    .map(ForeignInto::foreign_into),
+                card_testing_secret_key: None,
             },
         )))
     }
