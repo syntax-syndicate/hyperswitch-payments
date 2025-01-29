@@ -12,8 +12,8 @@ use crate::{
     core::{
         errors::{self, RouterResult, StorageErrorExt},
         payments::{
-            self, helpers, operations, CustomerDetails, IncrementalAuthorizationDetails,
-            PaymentAddress,
+            self, get_payment_link_response_from_id, helpers, operations, CustomerDetails,
+            IncrementalAuthorizationDetails, PaymentAddress,
         },
     },
     routes::{app::ReqState, SessionState},
@@ -127,6 +127,12 @@ impl<F: Send + Clone + Sync>
                 id: profile_id.get_string_repr().to_owned(),
             })?;
 
+        let payment_link_data = if let Some(id) = payment_intent.payment_link_id.as_ref() {
+            get_payment_link_response_from_id(state, id).await
+        } else {
+            None
+        };
+
         let payment_data = payments::PaymentData {
             flow: PhantomData,
             payment_intent,
@@ -159,7 +165,7 @@ impl<F: Send + Clone + Sync>
             redirect_response: None,
             surcharge_details: None,
             frm_message: None,
-            payment_link_data: None,
+            payment_link_data,
             incremental_authorization_details: Some(IncrementalAuthorizationDetails {
                 additional_amount: request.amount - amount,
                 total_amount: request.amount,

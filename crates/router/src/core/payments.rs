@@ -4493,6 +4493,23 @@ impl CustomerDetailsExt for CustomerDetails {
 }
 
 #[cfg(feature = "v1")]
+pub async fn get_payment_link_response_from_id(
+    state: &SessionState,
+    payment_link_id: &str,
+) -> Option<api_models::payments::PaymentLinkResponse> {
+    let db = &*state.store;
+    let payment_link_object = db
+        .find_payment_link_by_payment_link_id(payment_link_id)
+        .await
+        .ok()?;
+
+    Some(api_models::payments::PaymentLinkResponse {
+        link: payment_link_object.link_to_pay.clone(),
+        secure_link: payment_link_object.secure_link,
+        payment_link_id: payment_link_object.payment_link_id,
+    })
+}
+#[cfg(feature = "v1")]
 pub fn if_not_create_change_operation<'a, Op, F>(
     status: storage_enums::IntentStatus,
     confirm: Option<bool>,

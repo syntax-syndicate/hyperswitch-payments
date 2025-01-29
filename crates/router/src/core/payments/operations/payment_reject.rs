@@ -10,7 +10,9 @@ use super::{BoxedOperation, Domain, GetTracker, Operation, UpdateTracker, Valida
 use crate::{
     core::{
         errors::{self, RouterResult, StorageErrorExt},
-        payments::{helpers, operations, PaymentAddress, PaymentData},
+        payments::{
+            get_payment_link_response_from_id, helpers, operations, PaymentAddress, PaymentData,
+        },
     },
     events::audit_events::{AuditEvent, AuditEventType},
     routes::{app::ReqState, SessionState},
@@ -147,6 +149,11 @@ impl<F: Send + Clone + Sync> GetTracker<F, PaymentData<F>, PaymentsCancelRequest
             .to_not_found_response(errors::ApiErrorResponse::ProfileNotFound {
                 id: profile_id.get_string_repr().to_owned(),
             })?;
+        let payment_link_data = if let Some(id) = payment_intent.payment_link_id.as_ref() {
+            get_payment_link_response_from_id(state, id).await
+        } else {
+            None
+        };
 
         let payment_data = PaymentData {
             flow: PhantomData,
@@ -185,7 +192,7 @@ impl<F: Send + Clone + Sync> GetTracker<F, PaymentData<F>, PaymentsCancelRequest
             redirect_response: None,
             surcharge_details: None,
             frm_message: frm_response,
-            payment_link_data: None,
+            payment_link_data,
             incremental_authorization_details: None,
             authorizations: vec![],
             authentication: None,

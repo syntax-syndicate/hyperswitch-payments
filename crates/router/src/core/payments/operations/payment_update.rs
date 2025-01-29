@@ -22,7 +22,10 @@ use crate::{
         errors::{self, CustomResult, RouterResult, StorageErrorExt},
         mandate::helpers as m_helpers,
         payment_methods::cards::create_encrypted_data,
-        payments::{self, helpers, operations, CustomerDetails, PaymentAddress, PaymentData},
+        payments::{
+            self, get_payment_link_response_from_id, helpers, operations, CustomerDetails,
+            PaymentAddress, PaymentData,
+        },
         utils as core_utils,
     },
     events::audit_events::{AuditEvent, AuditEventType},
@@ -443,6 +446,11 @@ impl<F: Send + Clone + Sync> GetTracker<F, PaymentData<F>, api::PaymentsRequest>
         let surcharge_details = request.surcharge_details.map(|request_surcharge_details| {
             payments::types::SurchargeDetails::from((&request_surcharge_details, &payment_attempt))
         });
+        let payment_link_data = if let Some(id) = payment_intent.payment_link_id.as_ref() {
+            get_payment_link_response_from_id(state, id).await
+        } else {
+            None
+        };
 
         let payment_data = PaymentData {
             flow: PhantomData,
@@ -484,7 +492,7 @@ impl<F: Send + Clone + Sync> GetTracker<F, PaymentData<F>, api::PaymentsRequest>
             redirect_response: None,
             surcharge_details,
             frm_message: None,
-            payment_link_data: None,
+            payment_link_data,
             incremental_authorization_details: None,
             authorizations: vec![],
             authentication: None,
