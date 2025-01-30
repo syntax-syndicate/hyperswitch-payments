@@ -506,7 +506,7 @@ pub struct Amount {
 #[serde(untagged)]
 pub enum PaymentMethod<'a> {
     AdyenPaymentMethod(Box<AdyenPaymentMethod<'a>>),
-    AdyenMandatePaymentMethod(Box<AdyenMandatePaymentMethod>)
+    AdyenMandatePaymentMethod(Box<AdyenMandatePaymentMethod>),
 }
 #[derive(Debug, Clone, Serialize)]
 #[serde(untagged)]
