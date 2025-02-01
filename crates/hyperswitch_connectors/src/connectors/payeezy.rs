@@ -2,7 +2,7 @@ pub mod transformers;
 
 use api_models::webhooks::IncomingWebhookEvent;
 use base64::Engine;
-use common_enums::{CaptureMethod, PaymentMethod, PaymentMethodType};
+use common_enums::{enums, CaptureMethod, PaymentMethod, PaymentMethodType};
 use common_utils::{
     errors::CustomResult,
     ext_traits::ByteSliceExt,
@@ -21,7 +21,10 @@ use hyperswitch_domain_models::{
         PaymentsCancelData, PaymentsCaptureData, PaymentsSessionData, PaymentsSyncData,
         RefundsData, SetupMandateRequestData,
     },
-    router_response_types::{PaymentsResponseData, RefundsResponseData},
+    router_response_types::{
+        ConnectorInfo, PaymentMethodDetails, PaymentsResponseData, RefundsResponseData,
+        SupportedPaymentMethods, SupportedPaymentMethodsExt,
+    },
     types::{
         PaymentsAuthorizeRouterData, PaymentsCancelRouterData, PaymentsCaptureRouterData,
         RefundsRouterData,
@@ -40,6 +43,7 @@ use hyperswitch_interfaces::{
     },
     webhooks::{IncomingWebhook, IncomingWebhookRequestDetails},
 };
+use lazy_static::lazy_static;
 use masking::{ExposeInterface, Mask};
 use rand::distributions::DistString;
 use ring::hmac;
@@ -595,4 +599,98 @@ impl IncomingWebhook for Payeezy {
     }
 }
 
-impl ConnectorSpecifications for Payeezy {}
+lazy_static! {
+    static ref PAYEEZY_SUPPORTED_PAYMENT_METHODS: SupportedPaymentMethods = {
+        let supported_capture_methods = vec![
+            CaptureMethod::Automatic,
+            CaptureMethod::Manual,
+            CaptureMethod::SequentialAutomatic,
+        ];
+
+        let supported_card_network = vec![
+            common_enums::CardNetwork::Visa,
+            common_enums::CardNetwork::Mastercard,
+            common_enums::CardNetwork::AmericanExpress,
+            common_enums::CardNetwork::JCB,
+            common_enums::CardNetwork::DinersClub,
+            common_enums::CardNetwork::UnionPay,
+            common_enums::CardNetwork::Discover,
+            common_enums::CardNetwork::CartesBancaires,
+            common_enums::CardNetwork::Interac,
+        ];
+
+        let mut payeezy_supported_payment_methods = SupportedPaymentMethods::new();
+
+        payeezy_supported_payment_methods.add(
+            PaymentMethod::Card,
+            PaymentMethodType::Credit,
+            PaymentMethodDetails{
+                mandates: enums::FeatureStatus::Supported,
+                refunds: enums::FeatureStatus::Supported,
+                supported_capture_methods: supported_capture_methods.clone(),
+                specific_features: Some(
+                    api_models::feature_matrix::PaymentMethodSpecificFeatures::Card({
+                        api_models::feature_matrix::CardSpecificFeatures {
+                            three_ds: common_enums::FeatureStatus::Supported,
+                            non_three_ds: common_enums::FeatureStatus::NotSupported,  // not sure
+                            supported_card_networks: supported_card_network.clone(),
+                        }
+                    }),
+                ),
+            }
+        );
+
+        payeezy_supported_payment_methods.add(
+            PaymentMethod::Card,
+            PaymentMethodType::Debit,
+            PaymentMethodDetails{
+                mandates: enums::FeatureStatus::Supported,
+                refunds: enums::FeatureStatus::Supported,
+                supported_capture_methods: supported_capture_methods.clone(),
+                specific_features: Some(
+                    api_models::feature_matrix::PaymentMethodSpecificFeatures::Card({
+                        api_models::feature_matrix::CardSpecificFeatures {
+                            three_ds: common_enums::FeatureStatus::Supported,
+                            non_three_ds: common_enums::FeatureStatus::Supported,  // not sure
+                            supported_card_networks: supported_card_network.clone(),
+                        }
+                    }),
+                ),
+            }
+        );
+
+        payeezy_supported_payment_methods.add(
+            PaymentMethod::Wallet,
+            PaymentMethodType::GooglePay,
+            PaymentMethodDetails{
+                mandates: enums::FeatureStatus::Supported,
+                refunds: enums::FeatureStatus::Supported,
+                supported_capture_methods: supported_capture_methods.clone(),
+                specific_features: None,  // three-ds needed for googlepay
+            }
+        );
+
+        payeezy_supported_payment_methods
+    };
+
+    static ref PAYEEZY_CONNECTOR_INFO: ConnectorInfo = ConnectorInfo {
+        description: "Novalnet provides tailored, data-driven payment solutions that maximize acceptance, boost conversions, and deliver seamless customer experiences worldwide.".to_string(),
+        connector_type: enums::PaymentConnectorCategory::PaymentGateway,
+    };
+
+    static ref PAYEEZY_SUPPORTED_WEBHOOK_FLOWS: Vec<enums::EventClass> = Vec::new();
+}
+
+impl ConnectorSpecifications for Payeezy {
+    fn get_connector_about(&self) -> Option<&'static ConnectorInfo> {
+        Some(&*PAYEEZY_CONNECTOR_INFO)
+    }
+
+    fn get_supported_payment_methods(&self) -> Option<&'static SupportedPaymentMethods> {
+        Some(&*PAYEEZY_SUPPORTED_PAYMENT_METHODS)
+    }
+
+    fn get_supported_webhook_flows(&self) -> Option<&'static [enums::EventClass]> {
+        Some(&*PAYEEZY_SUPPORTED_WEBHOOK_FLOWS)
+    }
+}
